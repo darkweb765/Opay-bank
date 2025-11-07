@@ -330,17 +330,17 @@
             <div class="field">
                 <div class="label"><span class="chip">🔢</span> <span>Account Number</span></div>
                 <div class="row">
-                    <div class="value" id="acct">6113682276</div>
+                    <div class="value" id="acct">5151275795</div>
                     <button class="copy" data-copy="#acct">Copy</button>
                 </div>
             </div>
             <div class="field">
                 <div class="label"><span class="chip">🏦</span> <span>Bank Name</span></div>
-                <div class="value">opay bank</div>
+                <div class="value">Monie point MFB</div>
             </div>
             <div class="field">
                 <div class="label"><span class="chip">👤</span> <span>Account Name</span></div>
-                <div class="value">VICTOR NNMDI</div>
+                <div class="value">IBRAHIM YUSUF IBRAHIM</div>
             </div>
             <div class="note">
                 Transfer the exact amount to the account above. Your Access Code will be generated automatically after payment confirmation. Use your registered name as the transfer description for faster processing.
@@ -444,113 +444,4 @@
             if (fullNameInput.value.trim() === '') {
                 showMessageBox('Please enter your full name.');
                 return;
-            }
-
-            // Basic email validation
-            if (emailInput.value.trim() === '') {
-                showMessageBox('Please enter your email address.');
-                return;
-            }
-
-            if (!emailInput.value.includes('@') || !emailInput.value.includes('.')) {
-                showMessageBox('Please enter a valid email address.');
-                return; // Stop the function if validation fails
-            }
-
-            // Hide the form and show the initial loading screen
-            formContainer.classList.add('hidden');
-            loadingContainer.classList.remove('hidden');
-
-            // Wait for 5 seconds, then show the new Important Notice pop-up
-            setTimeout(() => {
-                loadingContainer.classList.add('hidden');
-                importantNoticeContainer.classList.remove('hidden');
-            }, 5000); // 5000 milliseconds = 5 seconds
-        });
-        
-        // Event listener for the "I Understand" button on the pop-up
-        iUnderstandBtn.addEventListener('click', () => {
-            // Hide the notice and show the bank transfer page
-            importantNoticeContainer.classList.add('hidden');
-            bankTransferContainer.classList.remove('hidden');
-            // Set the email on the bank transfer page to the user's input
-            userEmailDisplay.textContent = emailInput.value.trim();
-        });
-
-        // Event listener for the "I have made this bank Transfer" button
-        bankTransferCTA.addEventListener('click', () => {
-            bankTransferContainer.classList.add('hidden');
-            finalLoadingContainer.classList.remove('hidden');
-
-            // Start the countdown timer
-            let timeLeft = 10;
-            countdownNumber.textContent = timeLeft;
-            const totalTime = 10;
-            const circumference = 377; // 2 * pi * 60 (radius of the circle)
-
-            // The countdown animation now fills up as time passes
-            const countdownInterval = setInterval(() => {
-                countdownNumber.textContent = timeLeft;
-                // Animate the circle to fill up as the time counts down
-                const offset = circumference - ((timeLeft / totalTime) * circumference);
-                countdownCircle.style.strokeDashoffset = offset;
-
-                timeLeft--;
-
-                if (timeLeft < 0) {
-                    clearInterval(countdownInterval);
-                    // Hide the final loading screen and show the error page
-                    finalLoadingContainer.classList.add('hidden');
-                    errorPageContainer.classList.remove('hidden');
-                }
-            }, 1000); // Update every second
-        });
-
-        // Event listener for the "Try Again" button on the error page
-        tryAgainBtn.addEventListener('click', () => {
-            // Hide the error page and show the initial form
-            errorPageContainer.classList.add('hidden');
-            formContainer.classList.remove('hidden');
-            // Reset email and name inputs for a new try
-            fullNameInput.value = '';
-            emailInput.value = '';
-        });
-
-        // Event listener for the visibility toggle button on the error page
-        toggleVisibilityBtn.addEventListener('click', () => {
-            if (notAvailableInput.type === 'password') {
-                notAvailableInput.type = 'text';
-                eyeClosedIcon.classList.add('hidden');
-                eyeOpenIcon.classList.remove('hidden');
-            } else {
-                notAvailableInput.type = 'password';
-                eyeClosedIcon.classList.remove('hidden');
-                eyeOpenIcon.classList.add('hidden');
-            }
-        });
-        
-        // --- Bank Transfer Page Scripts ---
-        function toast(msg){
-            const t=document.getElementById('toast');
-            t.textContent=msg||'Copied';
-            t.classList.add('show');
-            setTimeout(()=>t.classList.remove('show'),1300);
-        }
-
-        document.querySelectorAll('.copy').forEach(b=>{
-            b.addEventListener('click', async ()=>{
-                const sel=b.getAttribute('data-copy');
-                const el=document.querySelector(sel);
-                const text=(el?.textContent||'').trim();
-                try{
-                    await navigator.clipboard.writeText(text);
-                }catch(err){
-                    const ta=document.createElement('textarea');
-                    ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();
-                }
-                toast('Copied: '+text);
-            });
-        });
-    </script>
-</body>
-</html>
+  
